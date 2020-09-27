@@ -1,10 +1,15 @@
 package com.robert.reyes.payments.services.paymentservice;
 
+import com.robert.reyes.payments.commands.CreateCardCommand;
 import com.robert.reyes.payments.commands.CreateCustomerCommand;
+import com.robert.reyes.payments.commands.CreatePaymentCommand;
+import com.robert.reyes.payments.dtos.CardDTO;
 import com.robert.reyes.payments.dtos.CustomerDTO;
+import com.robert.reyes.payments.dtos.PaymentDTO;
 import com.squareup.square.Environment;
 import com.squareup.square.SquareClient;
 import com.squareup.square.models.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.RequestScope;
 
@@ -14,11 +19,14 @@ import java.util.List;
 @Service
 @RequestScope
 public class SquareService implements PaymentService{
+    @Value("${squareApiToken:Not Found}")
+    private String squareApiToken;
+
     @Override
     public String createCustomer(CreateCustomerCommand createCustomerCommand) throws Exception{
         SquareClient client = new SquareClient.Builder()
                 .environment(Environment.SANDBOX)
-                .accessToken("")
+                .accessToken(squareApiToken)
                 .build();
 
         Address address = new Address.Builder()
@@ -52,7 +60,7 @@ public class SquareService implements PaymentService{
     public List<CustomerDTO> getCustomers() throws Exception {
         SquareClient client = new SquareClient.Builder()
                 .environment(Environment.SANDBOX)
-                .accessToken("")
+                .accessToken(squareApiToken)
                 .build();
 
         ArrayList<CustomerDTO> customerDTOS = new ArrayList<>();
@@ -68,5 +76,23 @@ public class SquareService implements PaymentService{
         return customerDTOS;
     }
 
+    @Override
+    public CardDTO createCard(CreateCardCommand createCardCommand) throws Exception {
+        SquareClient client = new SquareClient.Builder()
+                .environment(Environment.SANDBOX)
+                .accessToken(squareApiToken)
+                .build();
 
+        CreateCustomerCardRequest createCustomerCardRequest = new CreateCustomerCardRequest.Builder(createCardCommand.getCardToken()).build();
+
+        CreateCustomerCardResponse createCustomerCardResponse = client.getCustomersApi().createCustomerCard(createCardCommand.getCustomerId(), createCustomerCardRequest);
+        CardDTO cardDTO = new CardDTO();
+        cardDTO.setId(createCustomerCardResponse.getCard().getId());
+        return cardDTO;
+    }
+
+    @Override
+    public PaymentDTO createPayment(CreatePaymentCommand createPaymentCommand) throws Exception {
+        return null;
+    }
 }

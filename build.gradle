@@ -18,6 +18,7 @@ dependencies {
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
+	implementation 'org.springframework.cloud:spring-cloud-starter-config:2.2.5.RELEASE'
 
 	//Square API
 	implementation 'com.squareup:square:6.4.0.20200923'
