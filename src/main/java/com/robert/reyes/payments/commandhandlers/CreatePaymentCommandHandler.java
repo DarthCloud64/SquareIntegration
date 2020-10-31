@@ -5,7 +5,9 @@ import com.robert.reyes.payments.dtos.PaymentDTO;
 import com.robert.reyes.payments.services.paymentservice.PaymentService;
 import com.robert.reyes.payments.utils.mediator.CommandHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CreatePaymentCommandHandler extends CommandHandler<CreatePaymentCommand, PaymentDTO> {
     @Autowired
     private PaymentService paymentService;

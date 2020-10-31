@@ -7,5 +7,7 @@ import lombok.Data;
 @Data
 public class CreatePaymentCommand implements Command<PaymentDTO> {
     private String idempotencyKey;
-    private int amountInCents;
+    private long amountInCents;
+    private String sourceId;
+    private String customerId;
 }

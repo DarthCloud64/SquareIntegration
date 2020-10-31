@@ -93,6 +93,21 @@ public class SquareService implements PaymentService{
 
     @Override
     public PaymentDTO createPayment(CreatePaymentCommand createPaymentCommand) throws Exception {
-        return null;
+        SquareClient client = new SquareClient.Builder()
+                .environment(Environment.SANDBOX)
+                .accessToken(squareApiToken)
+                .build();
+
+        CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest.Builder(
+                createPaymentCommand.getSourceId(),
+                createPaymentCommand.getIdempotencyKey(),
+                new Money.Builder().amount(createPaymentCommand.getAmountInCents()).currency("USD").build())
+                .customerId(createPaymentCommand.getCustomerId()).build();
+
+        CreatePaymentResponse createPaymentResponse = client.getPaymentsApi().createPayment(createPaymentRequest);
+
+        PaymentDTO paymentDTO = new PaymentDTO();
+        paymentDTO.setPaymentId(createPaymentResponse.getPayment().getId());
+        return paymentDTO;
     }
 }
