@@ -4,6 +4,7 @@ import com.robert.reyes.payments.commands.CreateCardCommand;
 import com.robert.reyes.payments.commands.CreateCustomerCommand;
 import com.robert.reyes.payments.commands.CreatePaymentCommand;
 import com.robert.reyes.payments.dtos.CardDTO;
+import com.robert.reyes.payments.dtos.CreateCustomerRequestDTO;
 import com.robert.reyes.payments.dtos.CreatePaymentRequestDTO;
 import com.robert.reyes.payments.dtos.CustomerDTO;
 import com.robert.reyes.payments.dtos.LocationDTO;
@@ -63,37 +64,40 @@ public class SquareService implements PaymentService{
     }
 
     @Override
-    public String createCustomer(CreateCustomerCommand createCustomerCommand) throws Exception{
-        SquareClient client = new SquareClient.Builder()
-                .environment(Environment.SANDBOX)
-                .accessToken(squareApiToken)
-                .build();
-
+    public String createCustomer(CreateCustomerRequestDTO createCustomerRequestDto) throws Exception{
         Address address = new Address.Builder()
-                .addressLine1(createCustomerCommand.getAddress().getAddressLine1())
-                .addressLine2(createCustomerCommand.getAddress().getAddressLine2())
-                .locality(createCustomerCommand.getAddress().getCity())
-                .administrativeDistrictLevel1(createCustomerCommand.getAddress().getState())
-                .postalCode(createCustomerCommand.getAddress().getPostalCode())
-                .country(createCustomerCommand.getAddress().getCountry())
+                .addressLine1(createCustomerRequestDto.getAddress().getAddressLine1())
+                .addressLine2(createCustomerRequestDto.getAddress().getAddressLine2())
+                .locality(createCustomerRequestDto.getAddress().getCity())
+                .administrativeDistrictLevel1(createCustomerRequestDto.getAddress().getState())
+                .postalCode(createCustomerRequestDto.getAddress().getPostalCode())
+                .country(createCustomerRequestDto.getAddress().getCountry())
                 .build();
 
         CreateCustomerRequest createCustomerRequest = new CreateCustomerRequest.Builder()
-                .idempotencyKey(createCustomerCommand.getIdempotencyKey().toString())
-                .givenName(createCustomerCommand.getFirstName())
-                .familyName(createCustomerCommand.getLastName())
-                .companyName(createCustomerCommand.getCompanyName())
-                .nickname(createCustomerCommand.getNickName())
-                .emailAddress(createCustomerCommand.getEmailAddress())
+                .idempotencyKey(createCustomerRequestDto.getIdempotencyKey().toString())
+                .givenName(createCustomerRequestDto.getFirstName())
+                .familyName(createCustomerRequestDto.getLastName())
+                .companyName(createCustomerRequestDto.getCompanyName())
+                .nickname(createCustomerRequestDto.getNickName())
+                .emailAddress(createCustomerRequestDto.getEmailAddress())
                 .address(address)
-                .phoneNumber(createCustomerCommand.getPhoneNumber())
-                .referenceId(createCustomerCommand.getReferenceId())
-                .note(createCustomerCommand.getNote())
-                .birthday(createCustomerCommand.getBirthday())
+                .phoneNumber(createCustomerRequestDto.getPhoneNumber())
+                .referenceId(createCustomerRequestDto.getReferenceId())
+                .note(createCustomerRequestDto.getNote())
+                .birthday(createCustomerRequestDto.getBirthday())
                 .build();
+        
+        StringBuilder customerId = new StringBuilder();
+        squareClient
+            .getCustomersApi()
+            .createCustomerAsync(createCustomerRequest)
+            .thenAccept(response -> {
+                customerId.append(response.getCustomer().getId());
+            })
+            .join();
 
-        CreateCustomerResponse response = client.getCustomersApi().createCustomer(createCustomerRequest);
-        return response.getCustomer().getId();
+        return customerId.toString();
     }
 
     @Override
