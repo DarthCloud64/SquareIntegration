@@ -64,14 +64,14 @@ public class SquareService implements PaymentService{
                 .build();
 
         ArrayList<CustomerDTO> customerDTOS = new ArrayList<>();
-        ListCustomersResponse listCustomersResponse = client.getCustomersApi().listCustomers(null, null, null);
-        listCustomersResponse.getCustomers().forEach(x -> {
-            CustomerDTO temp = new CustomerDTO();
-            temp.setFirstName(x.getGivenName());
-            temp.setLastName(x.getFamilyName());
-            temp.setCustomerId(x.getId());
-            customerDTOS.add(temp);
-        });
+        // ListCustomersResponse listCustomersResponse = client.getCustomersApi().listCustomers(null, null, null);
+        // listCustomersResponse.getCustomers().forEach(x -> {
+        //     CustomerDTO temp = new CustomerDTO();
+        //     temp.setFirstName(x.getGivenName());
+        //     temp.setLastName(x.getFamilyName());
+        //     temp.setCustomerId(x.getId());
+        //     customerDTOS.add(temp);
+        // });
 
         return customerDTOS;
     }
@@ -98,16 +98,16 @@ public class SquareService implements PaymentService{
                 .accessToken(squareApiToken)
                 .build();
 
-        CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest.Builder(
-                createPaymentCommand.getSourceId(),
-                createPaymentCommand.getIdempotencyKey(),
-                new Money.Builder().amount(createPaymentCommand.getAmountInCents()).currency("USD").build())
-                .customerId(createPaymentCommand.getCustomerId()).build();
+        // CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest.Builder(
+        //         createPaymentCommand.getSourceId(),
+        //         createPaymentCommand.getIdempotencyKey(),
+        //         new Money.Builder().amount(createPaymentCommand.getAmountInCents()).currency("USD").build())
+        //         .customerId(createPaymentCommand.getCustomerId()).build();
 
-        CreatePaymentResponse createPaymentResponse = client.getPaymentsApi().createPayment(createPaymentRequest);
+        // CreatePaymentResponse createPaymentResponse = client.getPaymentsApi().createPayment(createPaymentRequest);
 
         PaymentDTO paymentDTO = new PaymentDTO();
-        paymentDTO.setPaymentId(createPaymentResponse.getPayment().getId());
+        // paymentDTO.setPaymentId(createPaymentResponse.getPayment().getId());
         return paymentDTO;
     }
 }
