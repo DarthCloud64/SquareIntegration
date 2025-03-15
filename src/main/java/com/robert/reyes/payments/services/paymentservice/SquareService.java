@@ -4,6 +4,7 @@ import com.robert.reyes.payments.commands.CreateCardCommand;
 import com.robert.reyes.payments.commands.CreateCustomerCommand;
 import com.robert.reyes.payments.commands.CreatePaymentCommand;
 import com.robert.reyes.payments.dtos.CardDTO;
+import com.robert.reyes.payments.dtos.CreatePaymentRequestDTO;
 import com.robert.reyes.payments.dtos.CustomerDTO;
 import com.robert.reyes.payments.dtos.LocationDTO;
 import com.robert.reyes.payments.dtos.LocationsDTO;
@@ -15,6 +16,8 @@ import com.squareup.square.models.*;
 
 import jakarta.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.RequestScope;
@@ -25,9 +28,10 @@ import java.util.List;
 @Service
 @RequestScope
 public class SquareService implements PaymentService{
+    private static final Logger logger = LoggerFactory.getLogger(SquareService.class);
+    
     @Value("${squareApiToken:Not Found}")
     private String squareApiToken;
-
     private SquareClient squareClient;
 
     public SquareService() {
@@ -45,15 +49,17 @@ public class SquareService implements PaymentService{
         LocationsDTO locations = new LocationsDTO();
         
         squareClient
-                .getLocationsApi()
-                .listLocationsAsync()
-                .thenAccept(listLocationsResponse -> {
-                        for (Location location : listLocationsResponse.getLocations()){
-                                locations.getLocations().add(new LocationDTO(location.getName()));
-                        }
-                });
-        
-                return locations;
+            .getLocationsApi()
+            .listLocationsAsync()
+            .thenAccept(listLocationsResponse -> {
+                logger.info("Locations count = {}", listLocationsResponse.getLocations().size());
+                for (Location location : listLocationsResponse.getLocations()){
+                        locations.getLocations().add(new LocationDTO(location.getName()));
+                }
+            })
+            .join();
+
+        return locations;
     }
 
     @Override
@@ -126,22 +132,25 @@ public class SquareService implements PaymentService{
     }
 
     @Override
-    public PaymentDTO createPayment(CreatePaymentCommand createPaymentCommand) throws Exception {
-        SquareClient client = new SquareClient.Builder()
-                .environment(Environment.SANDBOX)
-                .accessToken(squareApiToken)
-                .build();
-
-        // CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest.Builder(
-        //         createPaymentCommand.getSourceId(),
-        //         createPaymentCommand.getIdempotencyKey(),
-        //         new Money.Builder().amount(createPaymentCommand.getAmountInCents()).currency("USD").build())
-        //         .customerId(createPaymentCommand.getCustomerId()).build();
-
-        // CreatePaymentResponse createPaymentResponse = client.getPaymentsApi().createPayment(createPaymentRequest);
-
+    public PaymentDTO createPayment(CreatePaymentRequestDTO createPaymentRequestDTO) throws Exception {
+        CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest.Builder(createPaymentRequestDTO.getSourceId(), createPaymentRequestDTO.getIdempotencyKey())
+            .sourceId(createPaymentRequestDTO.getSourceId())
+            .idempotencyKey(createPaymentRequestDTO.getIdempotencyKey())
+            .amountMoney(new Money.Builder()
+                .amount(createPaymentRequestDTO.getAmount())
+                .currency(createPaymentRequestDTO.getCurrency())
+                .build())
+            .build();
+        
         PaymentDTO paymentDTO = new PaymentDTO();
-        // paymentDTO.setPaymentId(createPaymentResponse.getPayment().getId());
+        squareClient
+            .getPaymentsApi()
+            .createPaymentAsync(createPaymentRequest)
+            .thenAccept(response -> {
+                paymentDTO.setPaymentId(response.getPayment().getId());
+            })
+            .join();
+
         return paymentDTO;
     }
 }
