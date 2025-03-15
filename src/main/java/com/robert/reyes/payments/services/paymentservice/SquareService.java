@@ -5,10 +5,16 @@ import com.robert.reyes.payments.commands.CreateCustomerCommand;
 import com.robert.reyes.payments.commands.CreatePaymentCommand;
 import com.robert.reyes.payments.dtos.CardDTO;
 import com.robert.reyes.payments.dtos.CustomerDTO;
+import com.robert.reyes.payments.dtos.LocationDTO;
+import com.robert.reyes.payments.dtos.LocationsDTO;
 import com.robert.reyes.payments.dtos.PaymentDTO;
 import com.squareup.square.Environment;
 import com.squareup.square.SquareClient;
+import com.squareup.square.authentication.BearerAuthModel;
 import com.squareup.square.models.*;
+
+import jakarta.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.RequestScope;
@@ -21,6 +27,34 @@ import java.util.List;
 public class SquareService implements PaymentService{
     @Value("${squareApiToken:Not Found}")
     private String squareApiToken;
+
+    private SquareClient squareClient;
+
+    public SquareService() {
+    }
+
+    @PostConstruct
+    public void init(){
+        squareClient = new SquareClient.Builder()
+        .bearerAuthCredentials(new BearerAuthModel.Builder(squareApiToken).build())
+        .environment(Environment.SANDBOX)
+        .build();
+    }
+
+    public LocationsDTO getLocations() throws Exception {
+        LocationsDTO locations = new LocationsDTO();
+        
+        squareClient
+                .getLocationsApi()
+                .listLocationsAsync()
+                .thenAccept(listLocationsResponse -> {
+                        for (Location location : listLocationsResponse.getLocations()){
+                                locations.getLocations().add(new LocationDTO(location.getName()));
+                        }
+                });
+        
+                return locations;
+    }
 
     @Override
     public String createCustomer(CreateCustomerCommand createCustomerCommand) throws Exception{
