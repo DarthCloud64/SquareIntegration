@@ -1,8 +1,6 @@
 package com.robert.reyes.payments.dtos;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
 public class AddressDTO {

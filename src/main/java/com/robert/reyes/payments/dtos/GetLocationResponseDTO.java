@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class LocationDTO {
+public class GetLocationResponseDTO {
     private String name;    
 }
