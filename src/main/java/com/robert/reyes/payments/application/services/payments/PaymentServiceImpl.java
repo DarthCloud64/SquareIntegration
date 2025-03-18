@@ -105,11 +105,11 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private void validateProviderDetails(CreatePaymentRequestDTO createPaymentRequestDto){
-        if(createPaymentRequestDto.getIdempotencyKey().isBlank()){
+        if(createPaymentRequestDto.getIdempotencyKey() == null || createPaymentRequestDto.getIdempotencyKey().isBlank()){
             throw new MissingProviderDetailsException("Idempotency key is required to prevent duplication in provider system");
         }
 
-        if(createPaymentRequestDto.getSourceId().isBlank()){
+        if(createPaymentRequestDto.getSourceId() == null || createPaymentRequestDto.getSourceId().isBlank()){
             throw new MissingProviderDetailsException("Source id is required for the provider to process payments");
         }
     }
@@ -119,7 +119,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new InvalidPaymentException("Payment amount must be greater than 0");
         }
 
-        if(payment.getCurrencyId().isBlank()){
+        if(payment.getCurrencyId() == null || payment.getCurrencyId().isBlank()){
             throw new InvalidPaymentException("Currency id is required");
         }
     }

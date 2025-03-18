@@ -1,5 +1,7 @@
 package com.robert.reyes.payments.application.services.payments;
 
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
 
@@ -15,12 +17,15 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.robert.reyes.payments.application.exceptions.InvalidCustomerException;
+import com.robert.reyes.payments.application.exceptions.InvalidPaymentException;
+import com.robert.reyes.payments.application.exceptions.MissingProviderDetailsException;
 import com.robert.reyes.payments.domain.customers.Address;
 import com.robert.reyes.payments.domain.customers.Customer;
 import com.robert.reyes.payments.domain.locations.Location;
 import com.robert.reyes.payments.domain.payments.PaymentProviderService;
 import com.robert.reyes.payments.dtos.AddressDTO;
 import com.robert.reyes.payments.dtos.CreateCustomerRequestDTO;
+import com.robert.reyes.payments.dtos.CreatePaymentRequestDTO;
 import com.robert.reyes.payments.dtos.GetLocationResponseDTO;
 import com.robert.reyes.payments.dtos.GetLocationsResponseDTO;
 
@@ -110,6 +115,54 @@ public class PaymentServiceImplTests {
             .thenAccept(result -> {
                 assertThat(result.getNewCustomerId()).isNotBlank();
             });
+    }
+
+    @ParameterizedTest
+    @MethodSource("createPaymentFailsGivenInvalidProviderDataStream")
+    public void createPaymentFailsGivenInvalidProviderData(String desc, CreatePaymentRequestDTO createPaymentRequestDTO) throws Exception{
+        assertThatExceptionOfType(MissingProviderDetailsException.class).isThrownBy(() -> {
+            paymentServiceImpl.createPayment(createPaymentRequestDTO)
+                .thenAccept(response -> {
+                    fail("createPayment() did not throw");
+                });
+        });
+    }
+
+    @ParameterizedTest
+    @MethodSource("createPaymentFailsGivenInvalidDataStream")
+    public void createPaymentFailsGivenInvalidData(String desc, CreatePaymentRequestDTO createPaymentRequestDTO) throws Exception{
+        assertThatExceptionOfType(InvalidPaymentException.class).isThrownBy(() -> {
+            paymentServiceImpl.createPayment(createPaymentRequestDTO)
+                .thenAccept(response -> {
+                    fail("createPayment() did not throw");
+                });
+        });
+    }
+
+    private static Stream<Object[]> createPaymentFailsGivenInvalidProviderDataStream() {
+        return Stream.of(
+            new Object[]{
+                "Idempotency key is missing",
+                new CreatePaymentRequestDTO(null, "source", 100L, "USD")
+            },
+            new Object[]{
+                "source is missing",
+                new CreatePaymentRequestDTO("idempotency", null, 100L, "USD")
+            }
+        );
+    }
+
+    private static Stream<Object[]> createPaymentFailsGivenInvalidDataStream() {
+        return Stream.of(
+            new Object[]{
+                "amount is 0",
+                new CreatePaymentRequestDTO("idempotency", "source", 0L, "USD")
+            },
+            new Object[]{
+                "currency is missing",
+                new CreatePaymentRequestDTO("idempotency", "source", 0L, null)
+            }
+        );
     }
 
     private static Stream<Object[]> createCustomerFailsGivenInvalidDataStream() {
