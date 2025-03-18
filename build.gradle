@@ -19,19 +19,19 @@ repositories {
 }
 
 dependencies {
-	//Spring and JUnit
+	// Compile and Runtime dependencies (Lombok requires annotation processing)
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-	//Square API
 	implementation group: 'com.squareup', name: 'square', version: '43.1.0.20250220'
-
-	//Lombok
 	compileOnly 'org.projectlombok:lombok:1.18.36'
 	annotationProcessor 'org.projectlombok:lombok:1.18.36'
 	testCompileOnly 'org.projectlombok:lombok:1.18.36'
 	testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
+
+	// Test only dependencies
+	testImplementation 'org.mockito:mockito-core'
+	testImplementation 'org.assertj:assertj-core'
 }
 
 tasks.named('test') {

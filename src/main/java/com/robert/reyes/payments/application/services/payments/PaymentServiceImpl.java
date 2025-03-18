@@ -149,23 +149,23 @@ public class PaymentServiceImpl implements PaymentService {
     private void validateCustomer(Customer customer) {
         validateAddress(customer.getAddress());
 
-        if(customer.getFirstName().isBlank()){
+        if(customer.getFirstName() == null || customer.getFirstName().isBlank()){
             throw new InvalidCustomerException("Customer first name is required");
         }
 
-        if(customer.getLastName().isBlank()){
+        if(customer.getLastName() == null || customer.getLastName().isBlank()){
             throw new InvalidCustomerException("Customer last name is required");
         }
 
-        if(customer.getEmailAddress().isBlank()){
+        if(customer.getEmailAddress() == null || customer.getEmailAddress().isBlank()){
             throw new InvalidCustomerException("Customer email address is required");
         }
 
-        if(customer.getPhoneNumber().isBlank()){
+        if(customer.getPhoneNumber() == null || customer.getPhoneNumber().isBlank()){
             throw new InvalidCustomerException("Customer phone number is required");
         }
 
-        if(customer.getBirthday().isBlank()){
+        if(customer.getBirthday() == null || customer.getBirthday().isBlank()){
             throw new InvalidCustomerException("Customer birthday is required");
         }
 

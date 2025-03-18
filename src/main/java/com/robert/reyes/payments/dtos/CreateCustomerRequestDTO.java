@@ -1,8 +1,10 @@
 package com.robert.reyes.payments.dtos;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class CreateCustomerRequestDTO {
     private String idempotencyKey;
     private String firstName;
